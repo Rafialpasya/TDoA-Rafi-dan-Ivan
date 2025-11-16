@@ -36,26 +36,86 @@ addpath([p '/functions']);
 addpath([p '/coba']); % only required for the test setups
 
 
-%% Read Parameters from config file, that specifies all parameters
-%---------------------------------------------
-%config;
+%% Config for TDOA setup
 
-%---------------------------------------------
-% Test modes:
-% for testing, generate html with configs below and compare output with
-% reference html in /test
-config_test;
-%config_test_fm;
-%config_test_other;
-% --------------------------------------------
+% RX and Ref TX Position
+rx3_lat = -7.3572570; % RX 3 Bu Rini
+rx3_long = 112.6770160;
+
+rx2_lat = -7.2774382; % RX 2 Pak Tri Budi
+rx2_long = 112.7930353;
+
+rx1_lat = -7.22795569; % RX 1 Sontoh Laut -7.22795569, 112.68459984
+rx1_long = 112.68459984;
+
+tx_ref_lat = -7.2885674 ; % Referensi Radio SS titik gmaps 1000
+tx_ref_long = 112.6993234;
+% tx_ref_lat = -7.3200864; % Referensi Radio Gen FM titik gmaps 1031
+% tx_ref_long = 112.7312756;
+% tx_ref_lat = -7.2902441; % Referensi TVRI titik gmaps 5860
+% tx_ref_long = 112.7139568;
+% tx_ref_lat = -7.3250054; % Referensi 933
+% tx_ref_long = 112.7380274;
+% tx_ref_lat = -7.3200864; % Referensi 1031
+% tx_ref_long = 112.7312756;
+
+% tx_cari_lat = -7.3250054; % cari el-victor 933
+% tx_cari_long = 112.7380274;
+% tx_cari_lat = -7.3200864; % cari Gen FM 1031
+% tx_cari_long = 112.7312756;
+
+tx_cari_lat = -7.2816454; % cari Radio Suara Muslim 938
+tx_cari_long = 112.7461872;
+% tx_cari_lat = -7.2755979; % cari Radio Sonora 980
+% tx_cari_long = 112.6846293;
+% tx_cari_lat = -7.2734006; % cari Radio EBS 1059
+% tx_cari_long = 112.7490406;
+
+center_point_lat = -7.27513819; % center point
+center_point_long = 112.7263886; % center point
+
+% signal processing parameters
+%signal_bandwidth_khz = 0;  % 400, 200, 40, 12, 0(no)
+signal_bandwidth_khz = 40;  % 400, 200, 40, 12, 0(no)
+smoothing_factor = 0;
+% smoothing_factor = 3;
+
+%corr_type = 'dphase';  %'abs' or 'dphase'
+corr_type = 'dphase';  %'abs' or 'dphase'
+interpol_factor = 0;
+
+% additional processing of ref signal
+%(set to > 0 only when other signals than the ref signal falls into the full RX bandwidth)
+ref_bandwidth_khz = 40; % 400, 200, 40, 12, 0(no)
+smoothing_factor_ref = 0;
+% smoothing_factor_ref = 3;
+
+% 0: no plots
+% 1: show correlation plots
+% 2: show also input spcetrograms and spectra of input meas
+% 3: show also before and after filtering
+report_level = 0;
+
+% map output
+% 'open_street_map' (default) or 'google_maps'
+map_mode = 'open_street_map';
+
+% heatmap (only with google maps)
+heatmap_resolution = 200; % resolution for heatmap points
+heatmap_threshold = 0.70;  % heatmap point with lower mag are suppressed for html output
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Override file_identifier if provided as argument
 if ~isempty(file_override)
     disp(['Overriding config file_identifier with: ' file_override]);
     file_identifier = file_override;
 else
-    disp(['Using file from config: ' file_identifier]);
+    disp(['Using file from config: ' file_override]);
 end
+
+% base folder
+folder_identifier = 'data-november/';
+folder_result = 'data-nov-hasil/';
 
 % create filenames
 dateiname1 = [folder_identifier '1_' file_identifier];
@@ -244,6 +304,7 @@ disp('GENERATE MINIMUM DISTANCE');
 disp(['poin lat1 = ', num2str(length(points_lat1))]);
 disp(['poin lat2 = ', num2str(length(points_lat2))]);
 disp(['poin lat3 = ', num2str(length(points_lat3))]);
+% Penentuan titik tengah dari perpotongan garis hiperbola RX1 & RX2
 for i = 1:length(points_lat1)
     for j = 1:length(points_lat2)
         dist12(i,j) = dist_latlong(points_lat1(i), points_long1(i), points_lat2(j), points_long2(j), geo_ref_lat, geo_ref_long);
@@ -327,7 +388,7 @@ if strcmp(map_mode, 'google_maps')
 else
     % for open street map
     %create_html_file_osm( ['result/map_' file_identifier '_' corr_type '_interp' num2str(interpol_factor) '_bw' int2str(signal_bandwidth_khz) '_smooth' int2str(smoothing_factor) '_osm.html'], rx_lat_positions, rx_long_positions, hyperbola_lat_cell, hyperbola_long_cell, heatmap_cell, heatmap_threshold);
-    create_html_file_osm( ['data-juli25-hasil/map_' file_identifier '_' corr_type '_interp' num2str(interpol_factor) '_bw' int2str(signal_bandwidth_khz) '_smooth' int2str(smoothing_factor) '_osm.html'], rx_lat_positions, rx_long_positions, hyperbola_lat_cell, hyperbola_long_cell, heatmap_cell, heatmap_threshold);
+    create_html_file_osm( [folder_result 'map_' file_identifier '_' corr_type '_interp' num2str(interpol_factor) '_bw' int2str(signal_bandwidth_khz) '_smooth' int2str(smoothing_factor) '_osm.html'], rx_lat_positions, rx_long_positions, hyperbola_lat_cell, hyperbola_long_cell, heatmap_cell, heatmap_threshold);
 end
 disp('______________________________________________________________________________________________');
 
